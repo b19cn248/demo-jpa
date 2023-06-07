@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet author="liquibase-docs" id="addProductWithCategoriesProcedure" runOnChange="true">
+        <createProcedure catalogName="null"
+                         dbms="mysql"
+                         encoding="UTF-8"
+                         procedureName="addProductWithCategories"
+                         relativeToChangelogFile="true"
+                         replaceIfExists="false"
+                         schemaName="test_db">
+            <![CDATA[
+            CREATE DEFINER=`root`@`localhost` PROCEDURE `addProductWithCategories`(
+                IN productName VARCHAR(255),
+                IN productDescription VARCHAR(255),
+                IN categoryIds TEXT
+            )
+            BEGIN
+                DECLARE productId VARCHAR(36);
+                DECLARE categoryIdList TEXT;
+                DECLARE categoryId VARCHAR(36);
+
+                SET productId = UUID();
+
+            INSERT INTO products (id, name, description)
+            VALUES (productId, productName, productDescription);
+
+            SET categoryIdList = categoryIds;
+
+                WHILE LENGTH(categoryIdList) > 0 DO
+                    SET categoryId = SUBSTRING_INDEX(categoryIdList, ',', 1);
+                    SET categoryIdList = SUBSTRING(categoryIdList, LENGTH(categoryId) + 2);
+
+            INSERT INTO product_category (product_id, category_id)
+            VALUES (productId, categoryId);
+            END WHILE;
+
+            SELECT productId;
+            END;
+            ]]>
+        </createProcedure>
+    </changeSet>
+
+</databaseChangeLog>
